@@ -1,0 +1,96 @@
+"""
+Created on Wed Apr  8 09:36:13 2020.
+
+@author: kaliv
+
+Trains simple keras model.
+Used dataset: MNIST
+"""
+
+import os
+import time
+import numpy as np
+import tensorflow as tf
+import tensorflow.keras as keras
+from tensorflow.keras.datasets import mnist
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Dropout, Flatten, Conv2D
+
+
+def train():
+    """
+    Trains a simple convolutional net keras model on MNIST dataset.
+
+    Returns
+    -------
+    None.
+
+    """
+    # initial parameters
+    batch_size = 128
+    num_classes = 10
+    epochs = 12
+
+    # create dirs for result files
+    path_wd = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(
+        __file__)), '..', 'temp', str(time.time())))
+    os.makedirs(path_wd)
+
+    # load dataset
+    (x_train, y_train), (x_test, y_test) = mnist.load_data()
+
+    # preprocess data
+    x_train = x_train / 255
+    x_test = x_test / 255
+
+    axis = 1 if keras.backend.image_data_format() == 'channels_first' else -1
+
+    x_train = np.expand_dims(x_train, axis)
+    x_test = np.expand_dims(x_test, axis)
+    input_shape = x_train.shape[1:]
+
+    model = Sequential()
+    model.add(Conv2D(
+        32,
+        kernel_size=(3, 3),
+        activation=tf.nn.relu,
+        input_shape=input_shape
+        ))
+    model.add(Conv2D(64, kernel_size=(3, 3), activation=tf.nn.relu))
+    model.add(Dropout(0.25))
+    model.add(Flatten())
+    model.add(Dense(128, activation=tf.nn.relu))
+    model.add(Dropout(0.5))
+    model.add(Dense(num_classes))
+
+    loss_fn = keras.losses.SparseCategoricalCrossentropy(from_logits=True)
+
+    model.compile(optimizer='adam',
+                  loss=loss_fn,
+                  metrics=['accuracy'])
+
+    model.fit(
+        x_train,
+        y_train,
+        batch_size=batch_size,
+        epochs=epochs,
+        verbose=1,
+        validation_data=(x_test, y_test)
+        )
+    score = model.evaluate(x_test, y_test, verbose=0)
+
+    print('Test loss:', score[0])
+    print('Test accuracy:', score[1])
+
+    # save trained model and dataset
+    model_name = 'keras_mnist'
+    keras.models.save_model(
+        model,
+        os.path.join(path_wd, model_name + '.h5')
+        )
+
+    np.savez_compressed(os.path.join(path_wd, 'x_test'), x_test)
+    np.savez_compressed(os.path.join(path_wd, 'y_test'), y_test)
+    np.savez_compressed(os.path.join(path_wd, 'x_norm'), x_train[::10])
+
+    print('Model and dataset saved to {}'.format(path_wd))
