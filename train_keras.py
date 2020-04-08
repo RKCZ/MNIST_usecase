@@ -36,8 +36,10 @@ def train():
         __file__)), '..', 'temp', str(time.time())))
     os.makedirs(path_wd)
 
+    dataset_path = 'mnist.h5'
     # load dataset
-    (x_train, y_train), (x_test, y_test) = mnist.load_data()
+    dataset = mnist.load_data(path=dataset_path)
+    (x_train, y_train), (x_test, y_test) = dataset
 
     # preprocess data
     x_train = x_train / 255
