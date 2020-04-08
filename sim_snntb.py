@@ -1,6 +1,5 @@
 """Configures SNN-Toolbox and runs simulation of converted keras trained model.
 
-Created on Wed Apr  8 10:07:49 2020
 @author: kalivoda
 coding: utf-8
 """
@@ -10,7 +9,7 @@ from snntoolbox.bin.run import main
 from snntoolbox.utils.utils import import_configparser
 
 
-def config_and_sim():
+def config_and_sim(path_wd=None):
     """
     Create configuration for SNN-Toolbox and executes the simulation.
 
@@ -19,9 +18,11 @@ def config_and_sim():
     None.
 
     """
-    path_wd = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(
-        __file__)), '..', 'temp', str(time.time())))
-    filename_ann = 'keras_model.h5'
+    if path_wd is None:
+      print('Please specify path to working directory.')
+      return
+
+    filename_ann = 'keras_model'
 
     dt = 0.1  # Time resolution of simulator.
 
@@ -41,7 +42,7 @@ def config_and_sim():
     }
 
     config['simulation'] = {
-        'simulator': 'nest',  # Chooses execution backend of SNN toolbox.
+        'simulator': 'INI',  # Chooses execution backend of SNN toolbox.
         'duration': 50,  # Number of time steps to run each sample.
         'num_to_test': 5,  # How many test samples to run.
         'batch_size': 1,  # Batch size for simulation.
@@ -54,18 +55,19 @@ def config_and_sim():
         'v_thresh': 0.01  # Reducing default value (1) for higher spikerates.
     }
 
-    config['output'] = {
-        """
+    """
         Various plots (slows down simulation).
         Leave section empty to turn off plots.
-        """
+    """
+    config['output'] = {
         'plot_vars': {
             'spiketrains',
-            'spikerates',
+            #'spikerates',
             'activations',
-            'correlation',
-            'v_mem',
-            'error_t'}
+            #'correlation',
+            #'v_mem',
+            'error_t'
+            }
     }
 
     # Store config file.

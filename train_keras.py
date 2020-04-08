@@ -1,10 +1,7 @@
-"""
-Created on Wed Apr  8 09:36:13 2020.
+"""Trains simple keras model.
 
-@author: kaliv
-
-Trains simple keras model.
 Used dataset: MNIST
+@author: kaliv
 """
 
 import os
@@ -29,11 +26,11 @@ def train():
     # initial parameters
     batch_size = 128
     num_classes = 10
-    epochs = 12
+    epochs = 1
 
     # create dirs for result files
     path_wd = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(
-        __file__)), '..', 'temp', str(time.time())))
+        __file__)), 'temp', str(time.time())))
     os.makedirs(path_wd)
 
     # load dataset
@@ -82,7 +79,7 @@ def train():
     print('Test loss:', score[0])
     print('Test accuracy:', score[1])
 
-    # save trained model and dataset
+    # save trained model
     model_name = 'keras_mnist'
     keras.models.save_model(
         model,
@@ -94,3 +91,4 @@ def train():
     np.savez_compressed(os.path.join(path_wd, 'x_norm'), x_train[::10])
 
     print('Model and dataset saved to {}'.format(path_wd))
+    return path_wd
