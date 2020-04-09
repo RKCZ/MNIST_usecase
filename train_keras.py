@@ -7,11 +7,10 @@ Used dataset: MNIST
 import os
 import time
 import numpy as np
-import tensorflow as tf
-import tensorflow.keras as keras
-from tensorflow.keras.datasets import mnist
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, Dropout, Flatten, Conv2D
+import keras
+from keras.datasets import mnist
+from keras.models import Sequential
+from keras.layers import Dense, Dropout, Flatten, Conv2D
 
 
 def train():
@@ -52,13 +51,14 @@ def train():
     model.add(Conv2D(
         32,
         kernel_size=(3, 3),
-        activation=tf.nn.relu,
+        activation=keras.activations.relu,
         input_shape=input_shape
         ))
-    model.add(Conv2D(64, kernel_size=(3, 3), activation=tf.nn.relu))
+    model.add(Conv2D(64, kernel_size=(3, 3),
+                     activation=keras.activations.relu))
     model.add(Dropout(0.25))
     model.add(Flatten())
-    model.add(Dense(128, activation=tf.nn.relu))
+    model.add(Dense(128, activation=keras.activations.relu))
     model.add(Dropout(0.5))
     model.add(Dense(num_classes))
 
