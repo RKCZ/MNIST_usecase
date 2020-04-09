@@ -82,7 +82,7 @@ def train():
     print('Test accuracy:', score[1])
 
     # save trained model
-    model_name = 'keras_mnist'
+    model_name = 'keras_model'
     keras.models.save_model(
         model,
         os.path.join(path_wd, model_name + '.h5')
