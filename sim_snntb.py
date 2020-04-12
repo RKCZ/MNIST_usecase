@@ -44,16 +44,18 @@ def config_and_sim(path_wd=None):
     config['simulation'] = {
         'simulator': 'INI',  # Chooses execution backend of SNN toolbox.
         'duration': 50,  # Number of time steps to run each sample.
-        'num_to_test': 5,  # How many test samples to run.
-        'batch_size': 1,  # Batch size for simulation.
+        'num_to_test': 10000,  # How many test samples to run.
+        'batch_size': 500,
+        'top_k': 3,
+        'keras_backend': 'tensorflow',
         'dt': dt   # Time resolution for ODE solving.
     }
 
-    config['cell'] = {
-        'tau_refrac': dt,  # Refractory period and delay must be at
-        'delay': dt,  # least one time step.
-        'v_thresh': 0.01  # Reducing default value (1) for higher spikerates.
-    }
+    # config['cell'] = {
+    #     'tau_refrac': dt,  # Refractory period and delay must be at
+    #     'delay': dt,  # least one time step.
+    #     'v_thresh': 0.01  # Reducing default value (1) for higher spikerates.
+    # }
 
     """
         Various plots (slows down simulation).

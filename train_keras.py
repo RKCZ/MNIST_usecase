@@ -9,8 +9,10 @@ import time
 import numpy as np
 import keras
 from keras.datasets import mnist
-from keras.models import Sequential
-from keras.layers import Dense, Dropout, Flatten, Conv2D
+from keras.models import Sequential, Model
+from keras.layers import Dense, Dropout, Flatten, Conv2D, Input
+from keras.layers import BatchNormalization, Activation, Concatenate
+from keras.layers import AveragePooling2D
 
 
 def train():
@@ -23,9 +25,9 @@ def train():
 
     """
     # initial parameters
-    batch_size = 128
+    batch_size = 1024
     num_classes = 10
-    epochs = 1
+    epochs = 12
 
     # create dirs for result files
     path_wd = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(
@@ -45,24 +47,54 @@ def train():
 
     x_train = np.expand_dims(x_train, axis)
     x_test = np.expand_dims(x_test, axis)
+
+    y_train = keras.utils.np_utils.to_categorical(y_train)
+    y_test = keras.utils.np_utils.to_categorical(y_test)
     input_shape = x_train.shape[1:]
 
-    model = Sequential()
-    model.add(Conv2D(
-        32,
-        kernel_size=(3, 3),
-        activation=keras.activations.relu,
-        input_shape=input_shape
-        ))
-    model.add(Conv2D(64, kernel_size=(3, 3),
-                     activation=keras.activations.relu))
-    model.add(Dropout(0.25))
-    model.add(Flatten())
-    model.add(Dense(128, activation=keras.activations.relu))
-    model.add(Dropout(0.5))
-    model.add(Dense(num_classes))
+    # model = Sequential()
+    # model.add(Conv2D(
+    #     32,
+    #     kernel_size=(3, 3),
+    #     activation=keras.activations.relu,
+    #     input_shape=input_shape
+    #     ))
+    # model.add(Conv2D(64, kernel_size=(3, 3),
+    #                  activation=keras.activations.relu))
+    # model.add(Dropout(0.25))
+    # model.add(Flatten())
+    # model.add(Dense(128, activation=keras.activations.relu))
+    # model.add(Dropout(0.5))
+    # model.add(Dense(num_classes))
 
-    loss_fn = keras.losses.SparseCategoricalCrossentropy(from_logits=True)
+    input_layer = Input(input_shape)
+
+    layer = Conv2D(filters=16,
+               kernel_size=(5, 5),
+               strides=(2, 2))(input_layer)
+    layer = BatchNormalization(axis=axis)(layer)
+    layer = Activation('relu')(layer)
+    layer = AveragePooling2D()(layer)
+    branch1 = Conv2D(filters=32,
+                 kernel_size=(3, 3),
+                 padding='same',
+                 activation='relu')(layer)
+    branch2 = Conv2D(filters=8,
+                 kernel_size=(1, 1),
+                 activation='relu')(layer)
+    layer = Concatenate(axis=axis)([branch1, branch2])
+    layer = Conv2D(filters=10,
+               kernel_size=(3, 3),
+               activation='relu')(layer)
+    layer = Flatten()(layer)
+    layer = Dropout(0.01)(layer)
+    layer = Dense(units=10,
+              activation='softmax')(layer)
+
+    model = Model(input_layer, layer)
+    model.summary()
+
+    loss_fn = 'categorical_crossentropy'
 
     model.compile(optimizer='adam',
                   loss=loss_fn,
@@ -73,7 +105,7 @@ def train():
         y_train,
         batch_size=batch_size,
         epochs=epochs,
-        verbose=1,
+        verbose=2,
         validation_data=(x_test, y_test)
         )
     score = model.evaluate(x_test, y_test, verbose=0)
